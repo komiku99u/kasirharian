@@ -1,24 +1,69 @@
 let editIndex = -1;
-let products = JSON.parse(localStorage.getItem("products") || "[]");
+let products = JSON.parse(localStorage.getItem('products') || '[]');
+let productIndex = {};
 let cart = [];
 let sudahBayar = false;
 
-function saveProducts() {
-  localStorage.setItem("products", JSON.stringify(products));
+function buildProductIndex(){
+
+    productIndex = {};
+
+    products.forEach((p,index)=>{
+
+        if(!p.barcode) return;
+
+        productIndex[p.barcode] = {
+            ...p,
+            index
+        };
+
+    });
 }
 
-function exportProduk() {
-  const data = JSON.stringify(products, null, 2);
+function saveProducts(){
 
-  const blob = new Blob([data], { type: "application/json" });
+    localStorage.setItem(
+        'products',
+        JSON.stringify(products)
+    );
 
-  const a = document.createElement("a");
+    buildProductIndex();
+	console.log(
+  "Jumlah index:",
+  Object.keys(productIndex).length
+);
+}
 
-  a.href = URL.createObjectURL(blob);
+function exportCSV(){
 
-  a.download = "produk.json";
+    let csv =
+    'barcode,nama,harga\n';
 
-  a.click();
+    products.forEach(p => {
+
+        csv +=
+        `"${p.barcode}","${p.nama}",${p.harga}\n`;
+
+    });
+
+    const blob =
+    new Blob(
+        [csv],
+        {
+            type:'text/csv;charset=utf-8;'
+        }
+    );
+
+    const a =
+    document.createElement('a');
+
+    a.href =
+    URL.createObjectURL(blob);
+
+    a.download =
+    'produk.csv';
+
+    a.click();
 }
 
 function rupiah(n) {
@@ -57,7 +102,12 @@ function tambahProduk() {
   }
 
   saveProducts();
-  cariProduk();
+  buildProductIndex();
+  console.log(
+  "Jumlah index:",
+  Object.keys(productIndex).length
+);
+cariProduk();
 
   document.getElementById("barcode").value = "";
   document.getElementById("nama").value = "";
@@ -68,7 +118,12 @@ function hapusProduk(index) {
   if (!confirm("Hapus produk?")) return;
   products.splice(index, 1);
   saveProducts();
-  cariProduk();
+  buildProductIndex();
+  console.log(
+  "Jumlah index:",
+  Object.keys(productIndex).length
+);
+cariProduk();
 }
 function editProduk(index) {
   const p = products[index];
@@ -106,7 +161,8 @@ function cariProduk() {
       p.nama.toLowerCase().includes(keyword) ||
       p.barcode.toLowerCase().includes(keyword),
   );
-
+	let tambah = 0;
+let update = 0;
   hasil.forEach((p) => {
     const realIndex = products.indexOf(p);
 
@@ -337,13 +393,14 @@ scanInput.addEventListener("input", function () {
 
     if (!kode) return;
 
-    const produk = products.find((p) => p.barcode === kode);
+    const produk = productIndex[kode];
 
-    if (produk) {
-      tambahKeCart(products.indexOf(produk));
+if (produk) {
 
-      scanInput.value = "";
-    } else {
+  tambahKeCart(produk.index);
+
+  scanInput.value = "";
+} else {
       showAlert("Barcode tidak ditemukan");
     }
   }, 200);
@@ -351,30 +408,115 @@ scanInput.addEventListener("input", function () {
 window.onload = () => {
   document.getElementById("scanBarcode").focus();
 };
+buildProductIndex();
+console.log(
+  "Jumlah index:",
+  Object.keys(productIndex).length
+);
 cariProduk();
 
-document.getElementById("importFile").addEventListener("change", function (e) {
-  const file = e.target.files[0];
+document
+.getElementById('importFile')
+.addEventListener('change', function(e){
 
-  if (!file) return;
+    const file =
+    e.target.files[0];
 
-  const reader = new FileReader();
+    if(!file) return;
 
-  reader.onload = function () {
-    try {
-      products = JSON.parse(reader.result);
+    const reader =
+    new FileReader();
 
-      saveProducts();
+    reader.onload =
+    function(){
 
-      cariProduk();
+        try{
 
-      showAlert("Import berhasil");
-    } catch {
-      showAlert("File JSON tidak valid");
+            const rows =
+            reader.result
+            .split('\n')
+            .filter(r => r.trim());
+
+            const hasil = [];
+
+            for(
+                let i=1;
+                i<rows.length;
+                i++
+            ){
+
+                const kolom =
+                rows[i].split(',');
+
+                if(
+                    kolom.length < 3
+                ) continue;
+
+                hasil.push({
+
+                    barcode:
+                    kolom[0]
+                    .replace(/"/g,'')
+                    .trim(),
+
+                    nama:
+                    kolom[1]
+                    .replace(/"/g,'')
+                    .trim(),
+
+                    harga:
+                    Number(
+                        kolom[2]
+                    )
+
+                });
+            }
+let tambah = 0;
+let update = 0;
+            hasil.forEach(item => {
+
+    const existing =
+    products.find(
+        p => p.barcode === item.barcode
+    );
+
+    if(existing){
+
+        existing.nama =
+        item.nama;
+
+        existing.harga =
+        item.harga;
+
+        update++;
+
+    }else{
+
+        products.unshift(item);
+
+        tambah++;
     }
-  };
+});
 
-  reader.readAsText(file);
+            saveProducts();
+
+            showAlert(
+`Import selesai
+
+Produk baru : ${tambah}
+Produk diperbarui : ${update}
+Total produk : ${products.length}`
+);
+
+        }catch{
+
+            showAlert(
+                'Format CSV tidak valid'
+            );
+        }
+    };
+
+    reader.readAsText(file);
 });
 function showAlert(msg) {
   document.getElementById("popup").style.display = "flex";
