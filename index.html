@@ -22,14 +22,20 @@
           Batal Edit
         </button>
         <div class="row">
-          <button onclick="exportProduk()">Export Produk</button>
+          <button onclick="exportCSV()">
+    Export CSV
+</button>
 
-          <button onclick="document.getElementById('importFile').click()">
-            Import Produk
-          </button>
+<button onclick="document.getElementById('importFile').click()">
+    Import CSV
+</button>
         </div>
 
-        <input type="file" id="importFile" accept=".json" hidden />
+        <input
+    type="file"
+    id="importFile"
+    accept=".csv"
+    hidden>
 
         <input
           id="cari"
