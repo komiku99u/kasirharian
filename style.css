@@ -6,13 +6,15 @@ body {
   padding: 15px;
 }
 .grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 .card {
   background: #1e1e1e;
-  padding: 15px;
+  padding: 12px;
   border-radius: 12px;
 }
 input,
