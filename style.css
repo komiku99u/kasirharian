@@ -101,3 +101,21 @@ button {
   gap: 10px;
   margin-top: 15px;
 }
+.transaksi-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.transaksi-header h2{
+    margin:0;
+}
+
+.ringkasan{
+    text-align:right;
+    font-size:22px;
+    line-height:1.5;
+    font-weight:600;
+}
