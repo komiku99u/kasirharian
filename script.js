@@ -1,69 +1,47 @@
 let editIndex = -1;
-let products = JSON.parse(localStorage.getItem('products') || '[]');
+let products = JSON.parse(localStorage.getItem("products") || "[]");
 let productIndex = {};
 let cart = [];
 let sudahBayar = false;
 
-function buildProductIndex(){
+function buildProductIndex() {
+  productIndex = {};
 
-    productIndex = {};
+  products.forEach((p, index) => {
+    if (!p.barcode) return;
 
-    products.forEach((p,index)=>{
-
-        if(!p.barcode) return;
-
-        productIndex[p.barcode] = {
-            ...p,
-            index
-        };
-
-    });
+    productIndex[p.barcode] = {
+      ...p,
+      index,
+    };
+  });
 }
 
-function saveProducts(){
+function saveProducts() {
+  localStorage.setItem("products", JSON.stringify(products));
 
-    localStorage.setItem(
-        'products',
-        JSON.stringify(products)
-    );
-
-    buildProductIndex();
-	console.log(
-  "Jumlah index:",
-  Object.keys(productIndex).length
-);
+  buildProductIndex();
+  console.log("Jumlah index:", Object.keys(productIndex).length);
 }
 
-function exportCSV(){
+function exportCSV() {
+  let csv = "barcode,nama,harga\n";
 
-    let csv =
-    'barcode,nama,harga\n';
+  products.forEach((p) => {
+    csv += `"${p.barcode}","${p.nama}",${p.harga}\n`;
+  });
 
-    products.forEach(p => {
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;",
+  });
 
-        csv +=
-        `"${p.barcode}","${p.nama}",${p.harga}\n`;
+  const a = document.createElement("a");
 
-    });
+  a.href = URL.createObjectURL(blob);
 
-    const blob =
-    new Blob(
-        [csv],
-        {
-            type:'text/csv;charset=utf-8;'
-        }
-    );
+  a.download = "produk.csv";
 
-    const a =
-    document.createElement('a');
-
-    a.href =
-    URL.createObjectURL(blob);
-
-    a.download =
-    'produk.csv';
-
-    a.click();
+  a.click();
 }
 
 function rupiah(n) {
@@ -103,11 +81,8 @@ function tambahProduk() {
 
   saveProducts();
   buildProductIndex();
-  console.log(
-  "Jumlah index:",
-  Object.keys(productIndex).length
-);
-cariProduk();
+  console.log("Jumlah index:", Object.keys(productIndex).length);
+  cariProduk();
 
   document.getElementById("barcode").value = "";
   document.getElementById("nama").value = "";
@@ -119,11 +94,8 @@ function hapusProduk(index) {
   products.splice(index, 1);
   saveProducts();
   buildProductIndex();
-  console.log(
-  "Jumlah index:",
-  Object.keys(productIndex).length
-);
-cariProduk();
+  console.log("Jumlah index:", Object.keys(productIndex).length);
+  cariProduk();
 }
 function editProduk(index) {
   const p = products[index];
@@ -161,8 +133,8 @@ function cariProduk() {
       p.nama.toLowerCase().includes(keyword) ||
       p.barcode.toLowerCase().includes(keyword),
   );
-	let tambah = 0;
-let update = 0;
+  let tambah = 0;
+  let update = 0;
   hasil.forEach((p) => {
     const realIndex = products.indexOf(p);
 
@@ -284,7 +256,6 @@ function updateKembalian() {
 }
 function prosesBayar() {
   const total = getTotal();
-
   const bayar = Number(document.getElementById("bayar").value || 0);
 
   if (total <= 0) {
@@ -297,11 +268,19 @@ function prosesBayar() {
     return;
   }
 
-  sudahBayar = true;
-
-  document.getElementById("statusBayar").innerHTML = "✅ Sudah Dibayar";
-
   showAlert("Pembayaran berhasil");
+
+  cart = [];
+
+  document.getElementById("bayar").value = "";
+
+  sudahBayar = false;
+
+  document.getElementById("statusBayar").innerHTML = "❌ Belum Dibayar";
+
+  renderCart();
+
+  document.getElementById("scanBarcode").focus();
 }
 function tambahBayar(nominal) {
   const bayar = Number(document.getElementById("bayar").value || 0);
@@ -321,47 +300,7 @@ function resetBayar() {
 
   updateKembalian();
 }
-function transaksiBaru() {
-  showConfirm("Kosongkan transaksi?", function (ok) {
-    if (!ok) return;
 
-    cart = [];
-    document.getElementById("bayar").value = "";
-
-    sudahBayar = false;
-
-    document.getElementById("statusBayar").innerHTML = "❌ Belum Dibayar";
-
-    renderCart();
-  });
-  cart = [];
-  document.getElementById("bayar").value = "";
-  sudahBayar = false;
-
-  document.getElementById("statusBayar").innerHTML = "❌ Belum Dibayar";
-  renderCart();
-  document.getElementById("scanBarcode").focus();
-}
-
-function selesaikan() {
-  if (cart.length === 0) {
-    showAlert("Keranjang kosong");
-
-    return;
-  }
-
-  if (!sudahBayar) {
-    showAlert("Klik Bayar terlebih dahulu");
-
-    return;
-  }
-
-  showAlert("Transaksi berhasil");
-
-  sudahBayar = false;
-
-  transaksiBaru();
-}
 function pilihProdukPertama() {
   const keyword = document.getElementById("cari").value.toLowerCase().trim();
 
@@ -395,12 +334,11 @@ scanInput.addEventListener("input", function () {
 
     const produk = productIndex[kode];
 
-if (produk) {
+    if (produk) {
+      tambahKeCart(produk.index);
 
-  tambahKeCart(produk.index);
-
-  scanInput.value = "";
-} else {
+      scanInput.value = "";
+    } else {
       showAlert("Barcode tidak ditemukan");
     }
   }, 200);
@@ -409,114 +347,68 @@ window.onload = () => {
   document.getElementById("scanBarcode").focus();
 };
 buildProductIndex();
-console.log(
-  "Jumlah index:",
-  Object.keys(productIndex).length
-);
+console.log("Jumlah index:", Object.keys(productIndex).length);
 cariProduk();
 
-document
-.getElementById('importFile')
-.addEventListener('change', function(e){
+document.getElementById("importFile").addEventListener("change", function (e) {
+  const file = e.target.files[0];
 
-    const file =
-    e.target.files[0];
+  if (!file) return;
 
-    if(!file) return;
+  const reader = new FileReader();
 
-    const reader =
-    new FileReader();
+  reader.onload = function () {
+    try {
+      const rows = reader.result.split("\n").filter((r) => r.trim());
 
-    reader.onload =
-    function(){
+      const hasil = [];
 
-        try{
+      for (let i = 1; i < rows.length; i++) {
+        const kolom = rows[i].split(",");
 
-            const rows =
-            reader.result
-            .split('\n')
-            .filter(r => r.trim());
+        if (kolom.length < 3) continue;
 
-            const hasil = [];
+        hasil.push({
+          barcode: kolom[0].replace(/"/g, "").trim(),
 
-            for(
-                let i=1;
-                i<rows.length;
-                i++
-            ){
+          nama: kolom[1].replace(/"/g, "").trim(),
 
-                const kolom =
-                rows[i].split(',');
+          harga: Number(kolom[2]),
+        });
+      }
+      let tambah = 0;
+      let update = 0;
+      hasil.forEach((item) => {
+        const existing = products.find((p) => p.barcode === item.barcode);
 
-                if(
-                    kolom.length < 3
-                ) continue;
+        if (existing) {
+          existing.nama = item.nama;
 
-                hasil.push({
+          existing.harga = item.harga;
 
-                    barcode:
-                    kolom[0]
-                    .replace(/"/g,'')
-                    .trim(),
+          update++;
+        } else {
+          products.unshift(item);
 
-                    nama:
-                    kolom[1]
-                    .replace(/"/g,'')
-                    .trim(),
+          tambah++;
+        }
+      });
 
-                    harga:
-                    Number(
-                        kolom[2]
-                    )
+      saveProducts();
 
-                });
-            }
-let tambah = 0;
-let update = 0;
-            hasil.forEach(item => {
-
-    const existing =
-    products.find(
-        p => p.barcode === item.barcode
-    );
-
-    if(existing){
-
-        existing.nama =
-        item.nama;
-
-        existing.harga =
-        item.harga;
-
-        update++;
-
-    }else{
-
-        products.unshift(item);
-
-        tambah++;
-    }
-});
-
-            saveProducts();
-
-            showAlert(
-`Import selesai
+      showAlert(
+        `Import selesai
 
 Produk baru : ${tambah}
 Produk diperbarui : ${update}
-Total produk : ${products.length}`
-);
+Total produk : ${products.length}`,
+      );
+    } catch {
+      showAlert("Format CSV tidak valid");
+    }
+  };
 
-        }catch{
-
-            showAlert(
-                'Format CSV tidak valid'
-            );
-        }
-    };
-
-    reader.readAsText(file);
+  reader.readAsText(file);
 });
 function showAlert(msg) {
   document.getElementById("popup").style.display = "flex";
@@ -530,6 +422,54 @@ function showAlert(msg) {
   document.getElementById("popupOk").onclick = function () {
     document.getElementById("popup").style.display = "none";
   };
+}
+
+async function sinkronProduk() {
+  try {
+    const url =
+      "https://script.google.com/macros/s/AKfycbzTLMB4ZQBHozoLVMIaKXhQALfbXbiEb2Fmg792LYj9BtILo669V1l8-4XfNtfIJJs/exec";
+
+    const res = await fetch(url);
+
+    const data = await res.json();
+
+    let tambah = 0;
+    let update = 0;
+
+    data.forEach((item) => {
+      const existing = products.find((p) => p.barcode === item.barcode);
+
+      if (existing) {
+        existing.nama = item.nama;
+        existing.harga = Number(item.harga);
+
+        update++;
+      } else {
+        products.unshift({
+          barcode: item.barcode,
+          nama: item.nama,
+          harga: Number(item.harga),
+        });
+
+        tambah++;
+      }
+    });
+
+    saveProducts();
+    cariProduk();
+
+    showAlert(
+      `Sinkron selesai
+
+Produk baru : ${tambah}
+Produk diperbarui : ${update}
+Total produk : ${products.length}`,
+    );
+  } catch (err) {
+    showAlert("Gagal mengambil data spreadsheet");
+
+    console.error(err);
+  }
 }
 
 function showConfirm(msg, callback) {
