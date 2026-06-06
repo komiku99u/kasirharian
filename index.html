@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
   <head>
-    <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<link rel="icon" href="favicon.ico" type="image/x-icon">
-	<title>Kasir Harian</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <title>Kasir Harian</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="grid">
-	
-	<div class="card">
+      <div class="card">
         <h2>Transaksi</h2>
 
         <input
@@ -46,9 +44,6 @@
 
           <button onclick="resetBayar()">C</button>
         </div>
-        <div class="row">
-          <button class="success" onclick="prosesBayar()">💰 Bayar</button>
-        </div>
 
         <h2>Kembalian: Rp <span id="kembalian">0</span></h2>
         <h3 id="statusBayar">❌ Belum Dibayar</h3>
@@ -57,13 +52,9 @@
           <button onclick="prosesBayar()" style="background: #f59e0b">
             💰 Bayar
           </button>
-          <button class="success" onclick="selesaikan()">Selesaikan</button>
-          <button class="danger" onclick="transaksiBaru()">
-            Transaksi Baru
-          </button>
         </div>
       </div>
-	
+
       <div class="card">
         <h2>Produk</h2>
 
@@ -76,20 +67,15 @@
           Batal Edit
         </button>
         <div class="row">
-          <button onclick="exportCSV()">
-    Export CSV
-</button>
+          <button onclick="exportCSV()">Export CSV</button>
 
-<button onclick="document.getElementById('importFile').click()">
-    Import CSV
-</button>
+          <button onclick="document.getElementById('importFile').click()">
+            Import CSV
+          </button>
+          <button onclick="sinkronProduk()">🔄 Sinkron Produk</button>
         </div>
 
-        <input
-    type="file"
-    id="importFile"
-    accept=".csv"
-    hidden>
+        <input type="file" id="importFile" accept=".csv" hidden />
 
         <input
           id="cari"
@@ -104,7 +90,6 @@
 
         <div id="hasilCari"></div>
       </div>
-
     </div>
     <script src="script.js"></script>
     <div id="popup" style="display: none">
