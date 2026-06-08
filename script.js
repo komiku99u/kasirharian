@@ -305,11 +305,6 @@ function prosesBayar() {
 
   document.getElementById("bayar").value = "";
 
-  sudahBayar = false;
-
-  document.getElementById("statusBayar").innerHTML =
-    "❌ Belum Dibayar";
-
   renderCart();
 
   document.getElementById("scanBarcode").focus();
