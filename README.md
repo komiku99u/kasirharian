@@ -1,4 +1,4 @@
-# Kasir Harian
+# Kasir Harian.
 
 Aplikasi kasir sederhana berbasis HTML, CSS, dan JavaScript yang dapat dijalankan langsung di browser tanpa instalasi database atau server.
 
