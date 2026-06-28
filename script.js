@@ -1,75 +1,233 @@
 let editIndex = -1;
-let products = JSON.parse(localStorage.getItem('products') || '[]');
+let products = JSON.parse(localStorage.getItem("products") || "[]");
 let productIndex = {};
 let cart = [];
+let halamanProduk = 0;
+const produkPerHalaman = 24;
 let sudahBayar = false;
 
-function buildProductIndex(){
+let editProdukIndex = -1;
+function buildProductIndex() {
+  productIndex = {};
 
-    productIndex = {};
+  products.forEach((p, index) => {
+    if (!p.barcode) return;
 
-    products.forEach((p,index)=>{
-
-        if(!p.barcode) return;
-
-        productIndex[p.barcode] = {
-            ...p,
-            index
-        };
-
-    });
+    productIndex[p.barcode] = {
+      ...p,
+      index,
+    };
+  });
 }
 
-function saveProducts(){
+function saveProducts() {
+  localStorage.setItem("products", JSON.stringify(products));
 
-    localStorage.setItem(
-        'products',
-        JSON.stringify(products)
-    );
-
-    buildProductIndex();
-	console.log(
-  "Jumlah index:",
-  Object.keys(productIndex).length
-);
+  buildProductIndex();
+  console.log("Jumlah index:", Object.keys(productIndex).length);
 }
 
-function exportCSV(){
+function exportCSV() {
+  let csv = "barcode,nama,harga\n";
 
-    let csv =
-    'barcode,nama,harga\n';
+  products.forEach((p) => {
+    csv += `"${p.barcode}","${p.nama}",${p.harga}\n`;
+  });
 
-    products.forEach(p => {
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;",
+  });
 
-        csv +=
-        `"${p.barcode}","${p.nama}",${p.harga}\n`;
+  const a = document.createElement("a");
 
-    });
+  a.href = URL.createObjectURL(blob);
 
-    const blob =
-    new Blob(
-        [csv],
-        {
-            type:'text/csv;charset=utf-8;'
-        }
-    );
+  a.download = "produk.csv";
 
-    const a =
-    document.createElement('a');
-
-    a.href =
-    URL.createObjectURL(blob);
-
-    a.download =
-    'produk.csv';
-
-    a.click();
+  a.click();
 }
 
 function rupiah(n) {
   return Number(n).toLocaleString("id-ID");
 }
+function renderProdukGrid() {
+  const grid = document.getElementById("produkGrid");
 
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  const awal = halamanProduk * produkPerHalaman;
+
+  const akhir = awal + produkPerHalaman;
+
+  const tampil = products.slice(awal, akhir);
+
+  tampil.forEach((p) => {
+    const index = products.indexOf(p);
+
+    grid.innerHTML += `
+<div class="produk-card"
+     onclick="tambahKeCart(${index})">
+
+    <img src="${p.gambar || ""}"
+         alt="${p.nama}">
+
+    <div class="produk-info">
+
+        <b>${p.nama}</b>
+
+        <div class="produk-footer">
+
+            <span>
+                Rp ${rupiah(p.harga)}
+            </span>
+
+            <button
+    class="edit-produk"
+    onclick="event.stopPropagation(); bukaEditProduk(${index});">
+    ✏️
+</button>
+
+        </div>
+
+    </div>
+
+</div>
+`;
+  });
+  const totalHalaman = Math.max(
+    1,
+    Math.ceil(products.length / produkPerHalaman),
+  );
+
+  document.getElementById("halamanProduk").textContent =
+    halamanProduk + 1 + " / " + totalHalaman;
+
+  const tombolPrev = document.getElementById("btnPrev");
+
+  const tombolNext = document.getElementById("btnNext");
+
+  if (tombolPrev) {
+    tombolPrev.disabled = halamanProduk === 0;
+  }
+
+  if (tombolNext) {
+    tombolNext.disabled = halamanProduk >= totalHalaman - 1;
+  }
+}
+function nextProduk() {
+  const totalHalaman = Math.ceil(products.length / produkPerHalaman);
+
+  if (halamanProduk < totalHalaman - 1) {
+    halamanProduk++;
+
+    renderProdukGrid();
+  }
+}
+
+function prevProduk() {
+  if (halamanProduk > 0) {
+    halamanProduk--;
+
+    renderProdukGrid();
+  }
+}
+function bukaEditProduk(index) {
+  editProdukIndex = index;
+
+  const p = products[index];
+
+  document.getElementById("editBarcode").value = p.barcode;
+  document.getElementById("editNama").value = p.nama;
+  document.getElementById("editHarga").value = p.harga;
+
+  document.getElementById("editProdukPopup").style.display = "flex";
+}
+function tutupEditProduk() {
+  document.getElementById("editProdukPopup").style.display = "none";
+
+  editProdukIndex = -1;
+}
+async function simpanEditProduk() {
+  const btnSimpan = document.querySelector(
+    "#editProdukPopup .popup-buttons button",
+  );
+
+  const btnBatal = document.querySelector("#editProdukPopup .danger");
+
+  btnSimpan.disabled = true;
+  btnBatal.disabled = true;
+
+  btnSimpan.textContent = "⏳ Menyimpan...";
+
+  if (editProdukIndex < 0) return;
+
+  const nama = document.getElementById("editNama").value.trim();
+
+  const harga = Number(document.getElementById("editHarga").value);
+
+  if (!nama || !harga) {
+    showAlert("Nama dan harga wajib diisi");
+
+    return;
+  }
+
+  const produk = products[editProdukIndex];
+
+  const data = {
+    barcode: produk.barcode,
+
+    nama: nama,
+
+    harga: harga,
+  };
+
+  try {
+    const url =
+      `https://script.google.com/macros/s/AKfycbzTLMB4ZQBHozoLVMIaKXhQALfbXbiEb2Fmg792LYj9BtILo669V1l8-4XfNtfIJJs/exec` +
+      `?action=update` +
+      `&barcode=${encodeURIComponent(produk.barcode)}` +
+      `&nama=${encodeURIComponent(nama)}` +
+      `&harga=${encodeURIComponent(harga)}`;
+
+    const res = await fetch(url);
+
+    const hasil = await res.json();
+
+    if (!hasil.success) {
+      showAlert("Gagal memperbarui Spreadsheet");
+
+      return;
+    }
+
+    produk.nama = nama;
+
+    produk.harga = harga;
+
+    saveProducts();
+
+    renderProdukGrid();
+
+    cariProduk();
+    btnSimpan.disabled = false;
+    btnBatal.disabled = false;
+
+    btnSimpan.textContent = "Simpan";
+    tutupEditProduk();
+
+    showAlert("Produk berhasil diperbarui");
+  } catch (err) {
+    console.error(err);
+
+    showAlert("Tidak dapat terhubung ke Apps Script");
+  } finally {
+    btnSimpan.disabled = false;
+    btnBatal.disabled = false;
+
+    btnSimpan.textContent = "Simpan";
+  }
+}
 function tambahProduk() {
   const barcode = document.getElementById("barcode").value.trim();
 
@@ -87,6 +245,7 @@ function tambahProduk() {
       barcode,
       nama,
       harga,
+      gambar: products[editIndex].gambar || "",
     };
 
     editIndex = -1;
@@ -98,16 +257,15 @@ function tambahProduk() {
       barcode,
       nama,
       harga,
+      gambar: "",
     });
   }
 
   saveProducts();
+  renderProdukGrid();
   buildProductIndex();
-  console.log(
-  "Jumlah index:",
-  Object.keys(productIndex).length
-);
-cariProduk();
+  console.log("Jumlah index:", Object.keys(productIndex).length);
+  cariProduk();
 
   document.getElementById("barcode").value = "";
   document.getElementById("nama").value = "";
@@ -118,12 +276,10 @@ function hapusProduk(index) {
   if (!confirm("Hapus produk?")) return;
   products.splice(index, 1);
   saveProducts();
+  renderProdukGrid();
   buildProductIndex();
-  console.log(
-  "Jumlah index:",
-  Object.keys(productIndex).length
-);
-cariProduk();
+  console.log("Jumlah index:", Object.keys(productIndex).length);
+  cariProduk();
 }
 function editProduk(index) {
   const p = products[index];
@@ -161,8 +317,8 @@ function cariProduk() {
       p.nama.toLowerCase().includes(keyword) ||
       p.barcode.toLowerCase().includes(keyword),
   );
-	let tambah = 0;
-let update = 0;
+  let tambah = 0;
+  let update = 0;
   hasil.forEach((p) => {
     const realIndex = products.indexOf(p);
 
@@ -222,6 +378,7 @@ function tambahKeCart(index) {
   }
 
   renderCart();
+  renderProdukGrid();
   document.getElementById("cari").value = "";
   document.getElementById("hasilCari").innerHTML = "";
 }
@@ -283,11 +440,8 @@ function updateKembalian() {
   document.getElementById("kembalian").textContent = rupiah(bayar - getTotal());
 }
 function prosesBayar() {
-
   const total = getTotal();
-  const bayar = Number(
-    document.getElementById("bayar").value || 0
-  );
+  const bayar = Number(document.getElementById("bayar").value || 0);
 
   if (total <= 0) {
     showAlert("Belum ada transaksi");
@@ -361,128 +515,83 @@ scanInput.addEventListener("input", function () {
 
     const produk = productIndex[kode];
 
-if (produk) {
+    if (produk) {
+      tambahKeCart(produk.index);
 
-  tambahKeCart(produk.index);
-
-  scanInput.value = "";
-} else {
+      scanInput.value = "";
+    } else {
       showAlert("Barcode tidak ditemukan");
     }
   }, 200);
 });
 window.onload = () => {
   document.getElementById("scanBarcode").focus();
+
+  renderProdukGrid();
 };
 buildProductIndex();
-console.log(
-  "Jumlah index:",
-  Object.keys(productIndex).length
-);
+console.log("Jumlah index:", Object.keys(productIndex).length);
 cariProduk();
 
-document
-.getElementById('importFile')
-.addEventListener('change', function(e){
+document.getElementById("importFile").addEventListener("change", function (e) {
+  const file = e.target.files[0];
 
-    const file =
-    e.target.files[0];
+  if (!file) return;
 
-    if(!file) return;
+  const reader = new FileReader();
 
-    const reader =
-    new FileReader();
+  reader.onload = function () {
+    try {
+      const rows = reader.result.split("\n").filter((r) => r.trim());
 
-    reader.onload =
-    function(){
+      const hasil = [];
 
-        try{
+      for (let i = 1; i < rows.length; i++) {
+        const kolom = rows[i].split(",");
 
-            const rows =
-            reader.result
-            .split('\n')
-            .filter(r => r.trim());
+        if (kolom.length < 3) continue;
 
-            const hasil = [];
+        hasil.push({
+          barcode: kolom[0].replace(/"/g, "").trim(),
 
-            for(
-                let i=1;
-                i<rows.length;
-                i++
-            ){
+          nama: kolom[1].replace(/"/g, "").trim(),
 
-                const kolom =
-                rows[i].split(',');
+          harga: Number(kolom[2]),
+        });
+      }
+      let tambah = 0;
+      let update = 0;
+      hasil.forEach((item) => {
+        const existing = products.find((p) => p.barcode === item.barcode);
 
-                if(
-                    kolom.length < 3
-                ) continue;
+        if (existing) {
+          existing.nama = item.nama;
 
-                hasil.push({
+          existing.harga = item.harga;
 
-                    barcode:
-                    kolom[0]
-                    .replace(/"/g,'')
-                    .trim(),
+          update++;
+        } else {
+          products.unshift(item);
 
-                    nama:
-                    kolom[1]
-                    .replace(/"/g,'')
-                    .trim(),
+          tambah++;
+        }
+      });
 
-                    harga:
-                    Number(
-                        kolom[2]
-                    )
+      saveProducts();
 
-                });
-            }
-let tambah = 0;
-let update = 0;
-            hasil.forEach(item => {
-
-    const existing =
-    products.find(
-        p => p.barcode === item.barcode
-    );
-
-    if(existing){
-
-        existing.nama =
-        item.nama;
-
-        existing.harga =
-        item.harga;
-
-        update++;
-
-    }else{
-
-        products.unshift(item);
-
-        tambah++;
-    }
-});
-
-            saveProducts();
-
-            showAlert(
-`Import selesai
+      showAlert(
+        `Import selesai
 
 Produk baru : ${tambah}
 Produk diperbarui : ${update}
-Total produk : ${products.length}`
-);
+Total produk : ${products.length}`,
+      );
+    } catch {
+      showAlert("Format CSV tidak valid");
+    }
+  };
 
-        }catch{
-
-            showAlert(
-                'Format CSV tidak valid'
-            );
-        }
-    };
-
-    reader.readAsText(file);
+  reader.readAsText(file);
 });
 function showAlert(msg) {
   document.getElementById("popup").style.display = "flex";
@@ -499,65 +608,54 @@ function showAlert(msg) {
 }
 
 async function sinkronProduk() {
+  try {
+    const url =
+      "https://script.google.com/macros/s/AKfycbzTLMB4ZQBHozoLVMIaKXhQALfbXbiEb2Fmg792LYj9BtILo669V1l8-4XfNtfIJJs/exec";
 
-    try {
+    const res = await fetch(url);
 
-        const url =
-        "https://script.google.com/macros/s/AKfycbzTLMB4ZQBHozoLVMIaKXhQALfbXbiEb2Fmg792LYj9BtILo669V1l8-4XfNtfIJJs/exec";
+    const data = await res.json();
 
-        const res = await fetch(url);
+    let tambah = 0;
+    let update = 0;
 
-        const data = await res.json();
+    data.forEach((item) => {
+      const existing = products.find((p) => p.barcode === item.barcode);
 
-        let tambah = 0;
-        let update = 0;
+      if (existing) {
+        existing.nama = item.nama;
+        existing.harga = Number(item.harga);
+        existing.gambar = item.gambar || "";
 
-        data.forEach(item => {
-
-            const existing =
-            products.find(
-                p => p.barcode === item.barcode
-            );
-
-            if (existing) {
-
-                existing.nama = item.nama;
-                existing.harga = Number(item.harga);
-
-                update++;
-
-            } else {
-
-                products.unshift({
-                    barcode: item.barcode,
-                    nama: item.nama,
-                    harga: Number(item.harga)
-                });
-
-                tambah++;
-            }
-
+        update++;
+      } else {
+        products.unshift({
+          barcode: item.barcode,
+          nama: item.nama,
+          harga: Number(item.harga),
+          gambar: item.gambar || "",
         });
 
-        saveProducts();
-        cariProduk();
+        tambah++;
+      }
+    });
 
-        showAlert(
-`Sinkron selesai
+    saveProducts();
+    renderProdukGrid();
+    cariProduk();
+
+    showAlert(
+      `Sinkron selesai
 
 Produk baru : ${tambah}
 Produk diperbarui : ${update}
-Total produk : ${products.length}`
-);
+Total produk : ${products.length}`,
+    );
+  } catch (err) {
+    showAlert("Gagal mengambil data spreadsheet");
 
-    } catch (err) {
-
-        showAlert(
-            "Gagal mengambil data spreadsheet"
-        );
-
-        console.error(err);
-    }
+    console.error(err);
+  }
 }
 
 function showConfirm(msg, callback) {
