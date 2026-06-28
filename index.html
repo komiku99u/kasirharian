@@ -1,114 +1,132 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <title>Kasir Harian</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="grid">
-	
-	<div class="card">
-        
-		<div class="transaksi-header">
-    <h2>Transaksi</h2>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <div class="left-panel">
+        <div class="card">
+          <h2>Katalog Produk</h2>
 
-    <div class="ringkasan">
-        <div>Total: Rp <span id="total">0</span></div>
-        <div>Kembalian: Rp <span id="kembalian">0</span></div>
-    </div>
-</div>
+          <div class="paging">
+            <button id="btnPrev" onclick="prevProduk()">◀ Prev</button>
 
-        <input
-          id="scanBarcode"
-          placeholder="Scan barcode di sini..."
-          autocomplete="off"
-        />
-		
+            <span id="halamanProduk">1 / 1</span>
 
-        <div id="cartList"></div>
+            <button id="btnNext" onclick="nextProduk()">Next ▶</button>
+          </div>
 
-        
-
-        <input
-          id="bayar"
-          type="number"
-          placeholder="Uang Bayar"
-          oninput="updateKembalian()"
-        />
-
-        <div class="uang-cepat">
-          <button onclick="bayarPas()">Pas</button>
-
-          <button onclick="tambahBayar(5000)">5K</button>
-
-          <button onclick="tambahBayar(10000)">10K</button>
-
-          <button onclick="tambahBayar(20000)">20K</button>
-
-          <button onclick="tambahBayar(50000)">50K</button>
-
-          <button onclick="tambahBayar(100000)">100K</button>
-
-          <button onclick="resetBayar()">C</button>
+          <div id="produkGrid"></div>
         </div>
-        
+      </div>
 
-        
+      <div class="right-panel">
+        <div class="card">
+          <div class="transaksi-header">
+            <h2>Transaksi</h2>
 
-        <div class="row">
-          <button onclick="prosesBayar()" style="background: #f59e0b">
-            💰 Bayar
+            <div class="ringkasan">
+              <div>Total: Rp <span id="total">0</span></div>
+              <div>Kembalian: Rp <span id="kembalian">0</span></div>
+            </div>
+          </div>
+
+          <input
+            id="scanBarcode"
+            placeholder="Scan barcode di sini..."
+            autocomplete="off"
+          />
+
+          <div id="cartList"></div>
+
+          <input
+            id="bayar"
+            type="number"
+            placeholder="Uang Bayar"
+            oninput="updateKembalian()"
+          />
+
+          <div class="uang-cepat">
+            <button onclick="bayarPas()">Pas</button>
+
+            <button onclick="tambahBayar(5000)">5K</button>
+
+            <button onclick="tambahBayar(10000)">10K</button>
+
+            <button onclick="tambahBayar(20000)">20K</button>
+
+            <button onclick="tambahBayar(50000)">50K</button>
+
+            <button onclick="tambahBayar(100000)">100K</button>
+
+            <button onclick="resetBayar()">C</button>
+          </div>
+
+          <div class="row">
+            <button onclick="prosesBayar()" style="background: #f59e0b">
+              💰 Bayar
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Produk</h2>
+
+          <input id="barcode" placeholder="Barcode" />
+          <input id="nama" placeholder="Nama Produk" />
+          <input id="harga" type="number" placeholder="Harga" />
+
+          <button id="btnProduk" onclick="tambahProduk()">Tambah Produk</button>
+          <button id="btnBatal" style="display: none" onclick="batalEdit()">
+            Batal Edit
           </button>
+          <div class="row">
+            <button onclick="exportCSV()">Export CSV</button>
+
+            <button onclick="document.getElementById('importFile').click()">
+              Import CSV
+            </button>
+            <button onclick="sinkronProduk()">🔄 Sinkron Produk</button>
+          </div>
+
+          <input type="file" id="importFile" accept=".csv" hidden="" />
+
+          <input
+            id="cari"
+            placeholder="Cari produk atau scan barcode..."
+            oninput="cariProduk()"
+            onkeydown="
+              if (event.key === 'Enter') {
+                pilihProdukPertama();
+              }
+            "
+          />
+
+          <div id="hasilCari"></div>
         </div>
       </div>
-	
-      <div class="card">
-        <h2>Produk</h2>
+    </div>
+    <div id="editProdukPopup" style="display: none">
+      <div class="popup-box">
+        <h3>Edit Produk</h3>
 
-        <input id="barcode" placeholder="Barcode" />
-        <input id="nama" placeholder="Nama Produk" />
-        <input id="harga" type="number" placeholder="Harga" />
+        <input id="editBarcode" readonly placeholder="Barcode" />
 
-        <button id="btnProduk" onclick="tambahProduk()">Tambah Produk</button>
-        <button id="btnBatal" style="display: none" onclick="batalEdit()">
-          Batal Edit
-        </button>
-        <div class="row">
-          <button onclick="exportCSV()">
-    Export CSV
-</button>
+        <input id="editNama" placeholder="Nama Produk" />
 
-<button onclick="document.getElementById('importFile').click()">
-    Import CSV
-</button>
-<button onclick="sinkronProduk()">
-    🔄 Sinkron Produk
-</button>
+        <input id="editHarga" type="number" placeholder="Harga" />
+
+        <div class="popup-buttons">
+          <button onclick="simpanEditProduk()">Simpan</button>
+
+          <button class="danger" onclick="tutupEditProduk()">Batal</button>
         </div>
-
-        <input
-    type="file"
-    id="importFile"
-    accept=".csv"
-    hidden>
-
-        <input
-          id="cari"
-          placeholder="Cari produk atau scan barcode..."
-          oninput="cariProduk()"
-          onkeydown="
-            if (event.key === 'Enter') {
-              pilihProdukPertama();
-            }
-          "
-        />
-
-        <div id="hasilCari"></div>
       </div>
-
     </div>
     <script src="script.js"></script>
     <div id="popup" style="display: none">
