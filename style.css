@@ -5,12 +5,26 @@ body {
   font-family: Arial;
   padding: 15px;
 }
-.grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 600px;
-  margin: 0 auto;
+.layout{
+    display:flex;
+    gap:15px;
+    max-width:1600px;
+    margin:0 auto;
+    align-items:flex-start;
+}
+.left-panel{
+    width:65%;
+}
+
+.right-panel{
+    width:35%;
+
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+    position:sticky;
+    top:15px;
 }
 .card {
   background: #1e1e1e;
@@ -89,7 +103,15 @@ button {
   align-items: center;
   z-index: 9999;
 }
-
+#editProdukPopup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
 .popup-box {
   background: #1e1e1e;
   padding: 20px;
@@ -120,4 +142,108 @@ button {
     font-size:22px;
     line-height:1.5;
     font-weight:600;
+}
+#produkGrid{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:8px;
+    margin-top:10px;
+}
+
+.produk-card{
+    background:#2b2b2b;
+    border-radius:10px;
+    overflow:hidden;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.produk-card:hover{
+    transform:scale(1.02);
+}
+
+.produk-card img{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:contain;
+    display:block;
+    background:#fff;
+}
+
+.produk-info{
+    padding:6px;
+    min-height:58px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.produk-info b{
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    font-size:13px;
+    line-height:1.2;
+    min-height:32px;
+}
+
+.produk-info span{
+    color:#8df15b;
+    font-weight:bold;
+    font-size:13px;
+}
+.paging{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:12px 0;
+    gap:10px;
+}
+
+.paging button{
+    width:auto;
+    padding:8px 18px;
+}
+
+#halamanProduk{
+    font-weight:bold;
+}
+.paging button:disabled{
+
+    opacity:.4;
+
+    cursor:not-allowed;
+
+}
+.left-panel .card{
+    min-height:calc(100vh - 30px);
+}
+
+.right-panel .card{
+    margin-bottom:12px;
+}
+.produk-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:4px;
+}
+
+.edit-produk{
+    width:28px;
+    height:28px;
+    margin:0;
+    padding:0;
+    border:none;
+    border-radius:6px;
+    background:#111;
+    color:#fff;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.edit-produk:hover{
+    background:#111;
 }
