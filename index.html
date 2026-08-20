@@ -71,6 +71,9 @@
             <button onclick="prosesBayar()" style="background: #f59e0b">
               💰 Bayar
             </button>
+            <button id="btnPrint" onclick="printStruk()" style="display:none;background:#16a34a">
+              🖨️ Print Struk
+            </button>
           </div>
         </div>
 
@@ -128,6 +131,8 @@
         </div>
       </div>
     </div>
+    <!-- Area struk khusus printer thermal 58 mm -->
+    <div id="strukPrint" aria-hidden="true"></div>
     <script src="script.js"></script>
     <div id="popup" style="display: none">
       <div class="popup-box">
