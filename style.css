@@ -245,3 +245,108 @@ button {
 .edit-produk:hover {
   background: #111;
 }
+
+
+/* ================================
+   PRINT STRUK THERMAL 58 MM
+   ================================ */
+
+#strukPrint {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 58mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #strukPrint,
+  #strukPrint * {
+    visibility: visible !important;
+  }
+
+  #strukPrint {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 58mm;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #000;
+  }
+
+  .receipt {
+    width: 54mm;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 3mm 2mm 5mm;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .receipt-center {
+    text-align: center;
+  }
+
+  .receipt-store {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 1mm;
+  }
+
+  .receipt-separator {
+    white-space: pre;
+    text-align: center;
+    overflow: hidden;
+    margin: 1.5mm 0;
+  }
+
+  .receipt-item {
+    margin-bottom: 1.5mm;
+    page-break-inside: avoid;
+  }
+
+  .receipt-name {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .receipt-line,
+  .receipt-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 4mm;
+  }
+
+  .receipt-total {
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .receipt-thanks {
+    font-weight: 700;
+    margin-top: 2mm;
+  }
+
+  #btnPrint {
+    display: none !important;
+  }
+}
