@@ -668,11 +668,11 @@ function renderStruk(transaksi) {
     <div class="receipt">
 
       <div class="receipt-center receipt-store">
-        TOKO KAMU
+        TOKO TIRTA KENCANA
       </div>
 
       <div class="receipt-center">
-        Kasir Harian
+        Ds.Sidokaton, Kec.Kudu, Kab.Jombang 61454
       </div>
 
       <div class="receipt-center">
