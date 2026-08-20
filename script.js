@@ -961,29 +961,41 @@ Total produk : ${products.length}`,
    ========================================================= */
 
 function showAlert(msg) {
-  document.getElementById(
-    "popup",
-  ).style.display = "flex";
+  const popup = document.getElementById("popup");
+  const popupPrint = document.getElementById("popupPrint");
+  const popupCancel = document.getElementById("popupCancel");
 
-  document.getElementById(
-    "popupTitle",
-  ).innerText = "Informasi";
+  popup.style.display = "flex";
 
-  document.getElementById(
-    "popupMessage",
-  ).innerText = msg;
+  document.getElementById("popupTitle").innerText =
+    "Informasi";
 
-  document.getElementById(
-    "popupCancel",
-  ).style.display = "none";
+  document.getElementById("popupMessage").innerText =
+    msg;
 
-  document.getElementById(
-    "popupOk",
-  ).onclick = function () {
-    document.getElementById(
-      "popup",
-    ).style.display = "none";
-  };
+  popupCancel.style.display = "none";
+
+  /*
+   * Default: tombol Print disembunyikan.
+   */
+  popupPrint.style.display = "none";
+
+  /*
+   * Hanya tampilkan Print setelah pembayaran berhasil.
+   */
+  if (
+    msg ===
+    "Pembayaran berhasil. Struk siap dicetak."
+  ) {
+    popupPrint.style.display = "block";
+  }
+
+  document.getElementById("popupOk").onclick =
+    function () {
+      popup.style.display = "none";
+
+      popupPrint.style.display = "none";
+    };
 }
 
 
