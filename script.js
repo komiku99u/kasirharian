@@ -7,6 +7,7 @@ const produkPerHalaman = 24;
 let sudahBayar = false;
 
 let editProdukIndex = -1;
+
 function buildProductIndex() {
   productIndex = {};
 
@@ -50,6 +51,7 @@ function exportCSV() {
 function rupiah(n) {
   return Number(n).toLocaleString("id-ID");
 }
+
 function renderProdukGrid() {
   const grid = document.getElementById("produkGrid");
 
@@ -96,6 +98,7 @@ function renderProdukGrid() {
 </div>
 `;
   });
+
   const totalHalaman = Math.max(
     1,
     Math.ceil(products.length / produkPerHalaman),
@@ -116,6 +119,7 @@ function renderProdukGrid() {
     tombolNext.disabled = halamanProduk >= totalHalaman - 1;
   }
 }
+
 function nextProduk() {
   const totalHalaman = Math.ceil(products.length / produkPerHalaman);
 
@@ -133,6 +137,7 @@ function prevProduk() {
     renderProdukGrid();
   }
 }
+
 function bukaEditProduk(index) {
   editProdukIndex = index;
 
@@ -144,11 +149,13 @@ function bukaEditProduk(index) {
 
   document.getElementById("editProdukPopup").style.display = "flex";
 }
+
 function tutupEditProduk() {
   document.getElementById("editProdukPopup").style.display = "none";
 
   editProdukIndex = -1;
 }
+
 async function simpanEditProduk() {
   const btnSimpan = document.querySelector(
     "#editProdukPopup .popup-buttons button",
@@ -210,10 +217,12 @@ async function simpanEditProduk() {
     renderProdukGrid();
 
     cariProduk();
+
     btnSimpan.disabled = false;
     btnBatal.disabled = false;
 
     btnSimpan.textContent = "Simpan";
+
     tutupEditProduk();
 
     showAlert("Produk berhasil diperbarui");
@@ -228,6 +237,7 @@ async function simpanEditProduk() {
     btnSimpan.textContent = "Simpan";
   }
 }
+
 function tambahProduk() {
   const barcode = document.getElementById("barcode").value.trim();
 
@@ -249,6 +259,7 @@ function tambahProduk() {
     };
 
     editIndex = -1;
+
     document.getElementById("btnBatal").style.display = "none";
 
     document.getElementById("btnProduk").textContent = "Tambah Produk";
@@ -262,9 +273,13 @@ function tambahProduk() {
   }
 
   saveProducts();
+
   renderProdukGrid();
+
   buildProductIndex();
+
   console.log("Jumlah index:", Object.keys(productIndex).length);
+
   cariProduk();
 
   document.getElementById("barcode").value = "";
@@ -274,13 +289,20 @@ function tambahProduk() {
 
 function hapusProduk(index) {
   if (!confirm("Hapus produk?")) return;
+
   products.splice(index, 1);
+
   saveProducts();
+
   renderProdukGrid();
+
   buildProductIndex();
+
   console.log("Jumlah index:", Object.keys(productIndex).length);
+
   cariProduk();
 }
+
 function editProduk(index) {
   const p = products[index];
 
@@ -301,6 +323,7 @@ function editProduk(index) {
     behavior: "smooth",
   });
 }
+
 function cariProduk() {
   const keyword = document.getElementById("cari").value.toLowerCase().trim();
 
@@ -317,8 +340,10 @@ function cariProduk() {
       p.nama.toLowerCase().includes(keyword) ||
       p.barcode.toLowerCase().includes(keyword),
   );
+
   let tambah = 0;
   let update = 0;
+
   hasil.forEach((p) => {
     const realIndex = products.indexOf(p);
 
@@ -362,10 +387,13 @@ function cariProduk() {
         </div>`;
   }
 }
+
 function tambahKeCart(index) {
   const p = products[index];
 
-  let existing = cart.find((x) => x.barcode && x.barcode === p.barcode);
+  let existing = cart.find(
+    (x) => x.barcode && x.barcode === p.barcode,
+  );
 
   if (!existing) {
     existing = cart.find((x) => x.nama === p.nama);
@@ -374,12 +402,18 @@ function tambahKeCart(index) {
   if (existing) {
     existing.qty++;
   } else {
-    cart.push({ ...p, qty: 1 });
+    cart.push({
+      ...p,
+      qty: 1,
+    });
   }
 
   renderCart();
+
   renderProdukGrid();
+
   document.getElementById("cari").value = "";
+
   document.getElementById("hasilCari").innerHTML = "";
 }
 
@@ -394,8 +428,10 @@ function batalEdit() {
 
   btnBatal.style.display = "none";
 }
+
 function renderCart() {
   const el = document.getElementById("cartList");
+
   el.innerHTML = "";
 
   let total = 0;
@@ -412,12 +448,16 @@ function renderCart() {
 
       <div class="row">
         <button class="small" onclick="ubahQty(${index},-1)">-</button>
+
         <span>${item.qty}</span>
+
         <button class="small" onclick="ubahQty(${index},1)">+</button>
       </div>
    </div>`;
   });
+
   document.getElementById("total").textContent = rupiah(total);
+
   updateKembalian();
 }
 
@@ -432,16 +472,35 @@ function ubahQty(index, nilai) {
 }
 
 function getTotal() {
-  return cart.reduce((t, i) => t + i.harga * i.qty, 0);
+  return cart.reduce(
+    (t, i) => t + i.harga * i.qty,
+    0,
+  );
 }
 
 function updateKembalian() {
-  const bayar = Number(document.getElementById("bayar").value || 0);
-  document.getElementById("kembalian").textContent = rupiah(bayar - getTotal());
+  const bayar = Number(
+    document.getElementById("bayar").value || 0,
+  );
+
+  document.getElementById("kembalian").textContent =
+    rupiah(bayar - getTotal());
 }
+
+
+/* =========================================================
+   SISTEM PRINT STRUK
+   PRINTER THERMAL 58 MM
+   ========================================================= */
+
+let transaksiTerakhir = null;
+
 function prosesBayar() {
   const total = getTotal();
-  const bayar = Number(document.getElementById("bayar").value || 0);
+
+  const bayar = Number(
+    document.getElementById("bayar").value || 0,
+  );
 
   if (total <= 0) {
     showAlert("Belum ada transaksi");
@@ -453,8 +512,46 @@ function prosesBayar() {
     return;
   }
 
-  showAlert("Pembayaran berhasil");
+  const waktu = new Date();
 
+  /*
+   * Simpan salinan transaksi sebelum cart dikosongkan.
+   */
+  transaksiTerakhir = {
+    waktu: waktu,
+
+    items: cart.map((item) => ({
+      ...item,
+    })),
+
+    total: total,
+
+    bayar: bayar,
+
+    kembalian: bayar - total,
+  };
+
+  /*
+   * Buat isi struk.
+   */
+  renderStruk(transaksiTerakhir);
+
+  /*
+   * Tampilkan tombol print.
+   */
+  const btnPrint = document.getElementById("btnPrint");
+
+  if (btnPrint) {
+    btnPrint.style.display = "block";
+  }
+
+  showAlert(
+    "Pembayaran berhasil. Struk siap dicetak.",
+  );
+
+  /*
+   * Kosongkan transaksi setelah pembayaran.
+   */
   cart = [];
 
   document.getElementById("bayar").value = "";
@@ -463,15 +560,195 @@ function prosesBayar() {
 
   document.getElementById("scanBarcode").focus();
 }
-function tambahBayar(nominal) {
-  const bayar = Number(document.getElementById("bayar").value || 0);
 
-  document.getElementById("bayar").value = bayar + nominal;
+
+/*
+ * Membuat tampilan struk.
+ */
+function renderStruk(transaksi) {
+  const el = document.getElementById("strukPrint");
+
+  if (!el || !transaksi) return;
+
+  const pad = (n) =>
+    String(n).padStart(2, "0");
+
+  const d = transaksi.waktu;
+
+  const tanggal =
+    `${pad(d.getDate())}/` +
+    `${pad(d.getMonth() + 1)}/` +
+    `${d.getFullYear()} ` +
+    `${pad(d.getHours())}:` +
+    `${pad(d.getMinutes())}`;
+
+  /*
+   * Buat daftar produk.
+   */
+  const itemHtml = transaksi.items
+    .map((item) => {
+      const subtotal =
+        item.harga * item.qty;
+
+      return `
+        <div class="receipt-item">
+
+          <div class="receipt-name">
+            ${escapeHtml(item.nama)}
+          </div>
+
+          <div class="receipt-line">
+
+            <span>
+              ${item.qty} x ${rupiah(item.harga)}
+            </span>
+
+            <span>
+              Rp ${rupiah(subtotal)}
+            </span>
+
+          </div>
+
+        </div>
+      `;
+    })
+    .join("");
+
+  /*
+   * Isi struk.
+   */
+  el.innerHTML = `
+    <div class="receipt">
+
+      <div class="receipt-center receipt-store">
+        TOKO KAMU
+      </div>
+
+      <div class="receipt-center">
+        Kasir Harian
+      </div>
+
+      <div class="receipt-center">
+        ${tanggal}
+      </div>
+
+      <div class="receipt-separator">
+        --------------------------
+      </div>
+
+      ${itemHtml}
+
+      <div class="receipt-separator">
+        --------------------------
+      </div>
+
+      <div class="receipt-total">
+
+        <span>
+          TOTAL
+        </span>
+
+        <span>
+          Rp ${rupiah(transaksi.total)}
+        </span>
+
+      </div>
+
+      <div class="receipt-line">
+
+        <span>
+          BAYAR
+        </span>
+
+        <span>
+          Rp ${rupiah(transaksi.bayar)}
+        </span>
+
+      </div>
+
+      <div class="receipt-line">
+
+        <span>
+          KEMBALI
+        </span>
+
+        <span>
+          Rp ${rupiah(transaksi.kembalian)}
+        </span>
+
+      </div>
+
+      <div class="receipt-separator">
+        --------------------------
+      </div>
+
+      <div class="receipt-center receipt-thanks">
+        TERIMA KASIH
+      </div>
+
+    </div>
+  `;
+}
+
+
+/*
+ * Mencegah nama produk yang mengandung
+ * karakter HTML merusak tampilan struk.
+ */
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+/*
+ * Jalankan print browser.
+ */
+function printStruk() {
+  if (!transaksiTerakhir) {
+    showAlert(
+      "Belum ada transaksi yang bisa dicetak",
+    );
+
+    return;
+  }
+
+  /*
+   * Pastikan isi struk terbaru.
+   */
+  renderStruk(transaksiTerakhir);
+
+  /*
+   * CSS @media print akan menyembunyikan
+   * seluruh tampilan kasir dan hanya
+   * mencetak #strukPrint.
+   */
+  window.print();
+}
+
+
+/* =========================================================
+   PEMBAYARAN
+   ========================================================= */
+
+function tambahBayar(nominal) {
+  const bayar = Number(
+    document.getElementById("bayar").value || 0,
+  );
+
+  document.getElementById("bayar").value =
+    bayar + nominal;
 
   updateKembalian();
 }
+
 function bayarPas() {
-  document.getElementById("bayar").value = getTotal();
+  document.getElementById("bayar").value =
+    getTotal();
 
   updateKembalian();
 }
@@ -482,8 +759,18 @@ function resetBayar() {
   updateKembalian();
 }
 
+
+/* =========================================================
+   PENCARIAN PRODUK
+   ========================================================= */
+
 function pilihProdukPertama() {
-  const keyword = document.getElementById("cari").value.toLowerCase().trim();
+  const keyword =
+    document
+      .getElementById("cari")
+      .value
+      .toLowerCase()
+      .trim();
 
   if (keyword.length < 2) {
     return;
@@ -496,152 +783,272 @@ function pilihProdukPertama() {
   );
 
   if (hasil.length > 0) {
-    const realIndex = products.indexOf(hasil[0]);
+    const realIndex =
+      products.indexOf(hasil[0]);
 
     tambahKeCart(realIndex);
   }
 }
-const scanInput = document.getElementById("scanBarcode");
+
+
+/* =========================================================
+   BARCODE SCANNER
+   ========================================================= */
+
+const scanInput =
+  document.getElementById("scanBarcode");
 
 let scanTimer;
 
-scanInput.addEventListener("input", function () {
-  clearTimeout(scanTimer);
+scanInput.addEventListener(
+  "input",
+  function () {
+    clearTimeout(scanTimer);
 
-  scanTimer = setTimeout(() => {
-    const kode = scanInput.value.trim();
+    scanTimer = setTimeout(() => {
+      const kode =
+        scanInput.value.trim();
 
-    if (!kode) return;
+      if (!kode) return;
 
-    const produk = productIndex[kode];
+      const produk =
+        productIndex[kode];
 
-    if (produk) {
-      tambahKeCart(produk.index);
+      if (produk) {
+        tambahKeCart(produk.index);
 
-      scanInput.value = "";
-    } else {
-      showAlert("Barcode tidak ditemukan");
-    }
-  }, 200);
-});
+        scanInput.value = "";
+      } else {
+        showAlert(
+          "Barcode tidak ditemukan",
+        );
+      }
+    }, 200);
+  },
+);
+
+
+/* =========================================================
+   LOAD AWAL
+   ========================================================= */
+
 window.onload = () => {
-  document.getElementById("scanBarcode").focus();
+  document
+    .getElementById("scanBarcode")
+    .focus();
 
   renderProdukGrid();
 };
+
 buildProductIndex();
-console.log("Jumlah index:", Object.keys(productIndex).length);
+
+console.log(
+  "Jumlah index:",
+  Object.keys(productIndex).length,
+);
+
 cariProduk();
 
-document.getElementById("importFile").addEventListener("change", function (e) {
-  const file = e.target.files[0];
 
-  if (!file) return;
+/* =========================================================
+   IMPORT CSV
+   ========================================================= */
 
-  const reader = new FileReader();
+document
+  .getElementById("importFile")
+  .addEventListener(
+    "change",
+    function (e) {
+      const file =
+        e.target.files[0];
 
-  reader.onload = function () {
-    try {
-      const rows = reader.result.split("\n").filter((r) => r.trim());
+      if (!file) return;
 
-      const hasil = [];
+      const reader =
+        new FileReader();
 
-      for (let i = 1; i < rows.length; i++) {
-        const kolom = rows[i].split(",");
+      reader.onload = function () {
+        try {
+          const rows =
+            reader.result
+              .split("\n")
+              .filter(
+                (r) => r.trim(),
+              );
 
-        if (kolom.length < 3) continue;
+          const hasil = [];
 
-        hasil.push({
-          barcode: kolom[0].replace(/"/g, "").trim(),
+          for (
+            let i = 1;
+            i < rows.length;
+            i++
+          ) {
+            const kolom =
+              rows[i].split(",");
 
-          nama: kolom[1].replace(/"/g, "").trim(),
+            if (kolom.length < 3)
+              continue;
 
-          harga: Number(kolom[2]),
-        });
-      }
-      let tambah = 0;
-      let update = 0;
-      hasil.forEach((item) => {
-        const existing = products.find((p) => p.barcode === item.barcode);
+            hasil.push({
+              barcode:
+                kolom[0]
+                  .replace(/"/g, "")
+                  .trim(),
 
-        if (existing) {
-          existing.nama = item.nama;
+              nama:
+                kolom[1]
+                  .replace(/"/g, "")
+                  .trim(),
 
-          existing.harga = item.harga;
+              harga:
+                Number(kolom[2]),
+            });
+          }
 
-          update++;
-        } else {
-          products.unshift(item);
+          let tambah = 0;
+          let update = 0;
 
-          tambah++;
-        }
-      });
+          hasil.forEach(
+            (item) => {
+              const existing =
+                products.find(
+                  (p) =>
+                    p.barcode ===
+                    item.barcode,
+                );
 
-      saveProducts();
+              if (existing) {
+                existing.nama =
+                  item.nama;
 
-      showAlert(
-        `Import selesai
+                existing.harga =
+                  item.harga;
+
+                update++;
+              } else {
+                products.unshift(
+                  item,
+                );
+
+                tambah++;
+              }
+            },
+          );
+
+          saveProducts();
+
+          showAlert(
+            `Import selesai
 
 Produk baru : ${tambah}
 Produk diperbarui : ${update}
 Total produk : ${products.length}`,
-      );
-    } catch {
-      showAlert("Format CSV tidak valid");
-    }
-  };
+          );
+        } catch {
+          showAlert(
+            "Format CSV tidak valid",
+          );
+        }
+      };
 
-  reader.readAsText(file);
-});
+      reader.readAsText(file);
+    },
+  );
+
+
+/* =========================================================
+   POPUP
+   ========================================================= */
+
 function showAlert(msg) {
-  document.getElementById("popup").style.display = "flex";
+  document.getElementById(
+    "popup",
+  ).style.display = "flex";
 
-  document.getElementById("popupTitle").innerText = "Informasi";
+  document.getElementById(
+    "popupTitle",
+  ).innerText = "Informasi";
 
-  document.getElementById("popupMessage").innerText = msg;
+  document.getElementById(
+    "popupMessage",
+  ).innerText = msg;
 
-  document.getElementById("popupCancel").style.display = "none";
+  document.getElementById(
+    "popupCancel",
+  ).style.display = "none";
 
-  document.getElementById("popupOk").onclick = function () {
-    document.getElementById("popup").style.display = "none";
+  document.getElementById(
+    "popupOk",
+  ).onclick = function () {
+    document.getElementById(
+      "popup",
+    ).style.display = "none";
   };
 }
+
+
+/* =========================================================
+   SINKRON PRODUK GOOGLE SPREADSHEET
+   ========================================================= */
 
 async function sinkronProduk() {
   try {
     const url =
       "https://script.google.com/macros/s/AKfycbzTLMB4ZQBHozoLVMIaKXhQALfbXbiEb2Fmg792LYj9BtILo669V1l8-4XfNtfIJJs/exec";
 
-    const res = await fetch(url);
+    const res =
+      await fetch(url);
 
-    const data = await res.json();
+    const data =
+      await res.json();
 
     let tambah = 0;
     let update = 0;
 
-    data.forEach((item) => {
-      const existing = products.find((p) => p.barcode === item.barcode);
+    data.forEach(
+      (item) => {
+        const existing =
+          products.find(
+            (p) =>
+              p.barcode ===
+              item.barcode,
+          );
 
-      if (existing) {
-        existing.nama = item.nama;
-        existing.harga = Number(item.harga);
-        existing.gambar = item.gambar || "";
+        if (existing) {
+          existing.nama =
+            item.nama;
 
-        update++;
-      } else {
-        products.unshift({
-          barcode: item.barcode,
-          nama: item.nama,
-          harga: Number(item.harga),
-          gambar: item.gambar || "",
-        });
+          existing.harga =
+            Number(item.harga);
 
-        tambah++;
-      }
-    });
+          existing.gambar =
+            item.gambar || "";
+
+          update++;
+        } else {
+          products.unshift({
+            barcode:
+              item.barcode,
+
+            nama:
+              item.nama,
+
+            harga:
+              Number(item.harga),
+
+            gambar:
+              item.gambar || "",
+          });
+
+          tambah++;
+        }
+      },
+    );
 
     saveProducts();
+
     renderProdukGrid();
+
     cariProduk();
 
     showAlert(
@@ -652,29 +1059,52 @@ Produk diperbarui : ${update}
 Total produk : ${products.length}`,
     );
   } catch (err) {
-    showAlert("Gagal mengambil data spreadsheet");
+    showAlert(
+      "Gagal mengambil data spreadsheet",
+    );
 
     console.error(err);
   }
 }
 
+
+/* =========================================================
+   KONFIRMASI
+   ========================================================= */
+
 function showConfirm(msg, callback) {
-  document.getElementById("popup").style.display = "flex";
+  document.getElementById(
+    "popup",
+  ).style.display = "flex";
 
-  document.getElementById("popupTitle").innerText = "Konfirmasi";
+  document.getElementById(
+    "popupTitle",
+  ).innerText = "Konfirmasi";
 
-  document.getElementById("popupMessage").innerText = msg;
+  document.getElementById(
+    "popupMessage",
+  ).innerText = msg;
 
-  document.getElementById("popupCancel").style.display = "block";
+  document.getElementById(
+    "popupCancel",
+  ).style.display = "block";
 
-  document.getElementById("popupOk").onclick = function () {
-    document.getElementById("popup").style.display = "none";
+  document.getElementById(
+    "popupOk",
+  ).onclick = function () {
+    document.getElementById(
+      "popup",
+    ).style.display = "none";
 
     callback(true);
   };
 
-  document.getElementById("popupCancel").onclick = function () {
-    document.getElementById("popup").style.display = "none";
+  document.getElementById(
+    "popupCancel",
+  ).onclick = function () {
+    document.getElementById(
+      "popup",
+    ).style.display = "none";
 
     callback(false);
   };
