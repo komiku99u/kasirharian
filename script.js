@@ -60,7 +60,6 @@ function renderProdukGrid() {
   grid.innerHTML = "";
 
   const awal = halamanProduk * produkPerHalaman;
-
   const akhir = awal + produkPerHalaman;
 
   const tampil = products.slice(awal, akhir);
@@ -68,35 +67,80 @@ function renderProdukGrid() {
   tampil.forEach((p) => {
     const index = products.indexOf(p);
 
+    /*
+     * Jika produk tidak mempunyai URL gambar,
+     * langsung gunakan placeholder.
+     */
+    const gambar = p.gambar && p.gambar.trim();
+
+    let gambarHTML = "";
+
+    if (gambar) {
+      /*
+       * Produk mempunyai gambar.
+       * Jika URL ternyata rusak, onerror akan
+       * menggantinya dengan placeholder.
+       */
+      gambarHTML = `
+        <img
+          src="${gambar}"
+          alt="${p.nama}"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+        >
+
+        <div
+          class="produk-placeholder"
+          style="display:none;"
+        >
+          <span>NO IMAGE</span>
+          <b>${escapeHtml(p.nama)}</b>
+        </div>
+      `;
+    } else {
+      /*
+       * Tidak ada URL gambar.
+       */
+      gambarHTML = `
+        <div class="produk-placeholder">
+          <span>NO IMAGE</span>
+          <b>${escapeHtml(p.nama)}</b>
+        </div>
+      `;
+    }
+
     grid.innerHTML += `
-<div class="produk-card"
-     onclick="tambahKeCart(${index})">
+      <div
+        class="produk-card"
+        onclick="tambahKeCart(${index})"
+      >
 
-    <img src="${p.gambar || ""}"
-         alt="${p.nama}">
+        <div class="produk-image">
+          ${gambarHTML}
+        </div>
 
-    <div class="produk-info">
+        <div class="produk-info">
 
-        <b>${p.nama}</b>
+          <b>${escapeHtml(p.nama)}</b>
 
-        <div class="produk-footer">
+          <div class="produk-footer">
 
             <span>
-                Rp ${rupiah(p.harga)}
+              Rp ${rupiah(p.harga)}
             </span>
 
             <button
-    class="edit-produk"
-    onclick="event.stopPropagation(); bukaEditProduk(${index});">
-    ✏️
-</button>
+              class="edit-produk"
+              onclick="event.stopPropagation(); bukaEditProduk(${index});"
+            >
+              ✏️
+            </button>
+
+          </div>
 
         </div>
 
-    </div>
-
-</div>
-`;
+      </div>
+    `;
   });
 
   const totalHalaman = Math.max(
@@ -107,19 +151,22 @@ function renderProdukGrid() {
   document.getElementById("halamanProduk").textContent =
     halamanProduk + 1 + " / " + totalHalaman;
 
-  const tombolPrev = document.getElementById("btnPrev");
+  const tombolPrev =
+    document.getElementById("btnPrev");
 
-  const tombolNext = document.getElementById("btnNext");
+  const tombolNext =
+    document.getElementById("btnNext");
 
   if (tombolPrev) {
-    tombolPrev.disabled = halamanProduk === 0;
+    tombolPrev.disabled =
+      halamanProduk === 0;
   }
 
   if (tombolNext) {
-    tombolNext.disabled = halamanProduk >= totalHalaman - 1;
+    tombolNext.disabled =
+      halamanProduk >= totalHalaman - 1;
   }
 }
-
 function nextProduk() {
   const totalHalaman = Math.ceil(products.length / produkPerHalaman);
 
