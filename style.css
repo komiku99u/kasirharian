@@ -292,14 +292,19 @@ button {
   }
 
   .receipt {
-    width: 54mm;
-    box-sizing: border-box;
-    margin: 0 auto;
-    padding: 3mm 2mm 5mm;
-    font-family: "Courier New", monospace;
-    font-size: 11px;
-    line-height: 1.35;
-    font-weight: 600;
+  width: 54mm !important;
+  box-sizing: border-box;
+  margin: 0 auto !important;
+  padding: 3mm 1mm 5mm !important;
+
+  font-family: "Courier New", monospace !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+
+  font-weight: 600;
+
+  color: #000 !important;
+  background: #fff !important;
   }
 
   .receipt-center {
@@ -307,7 +312,7 @@ button {
   }
 
   .receipt-store {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     margin-bottom: 1mm;
   }
@@ -338,7 +343,7 @@ button {
 
   .receipt-total {
     font-weight: 700;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .receipt-thanks {
