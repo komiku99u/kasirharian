@@ -33,14 +33,24 @@
 
       <div class="right-panel">
         <div class="card">
-          <div class="transaksi-header">
-            <h2>Transaksi</h2>
 
-            <div class="ringkasan">
-              <div>Total: Rp <span id="total">0</span></div>
-              <div>Kembalian: Rp <span id="kembalian">0</span></div>
-            </div>
-          </div>
+  <div class="kasir-topbar">
+
+    <h2>Transaksi</h2>
+
+    <button
+      class="logout-button"
+      onclick="window.location.href='/api/logout'"
+    >
+      🚪 Logout
+    </button>
+
+  </div>
+
+  <div class="ringkasan">
+    <div>Total: Rp <span id="total">0</span></div>
+    <div>Kembalian: Rp <span id="kembalian">0</span></div>
+  </div>
 
           <input
             id="scanBarcode"
