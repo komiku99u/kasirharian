@@ -437,3 +437,34 @@ button {
 #produkGrid.produk-list-view .produk-footer > span { white-space:nowrap; font-size:14px; }
 #produkGrid.produk-list-view .edit-produk { width:30px; height:30px; }
 @media (max-width:768px) { .katalog-header { align-items:flex-start; } .view-btn { padding:6px 8px !important; font-size:11px; } }
+/* ================================
+   LOGOUT
+   ================================ */
+
+.kasir-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.kasir-topbar h2 {
+  margin: 0;
+}
+
+.logout-button {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 7px 12px !important;
+  background: #dc2626 !important;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: #b91c1c !important;
+}
