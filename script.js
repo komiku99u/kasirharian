@@ -1582,6 +1582,98 @@ Total produk : ${products.length}`
   }
 }
 
+async function simpanKeSpreadsheet() {
+
+  if (!products.length) {
+
+    showAlert(
+      "Tidak ada produk untuk disimpan."
+    );
+
+    return;
+  }
+
+
+  const yakin =
+    confirm(
+      `Simpan ${products.length} produk ke Google Spreadsheet?\n\n` +
+      `Produk yang barcode-nya sudah ada akan diperbarui.\n` +
+      `Produk baru akan ditambahkan.\n\n` +
+      `Produk lain yang hanya ada di Spreadsheet tidak akan dihapus.`
+    );
+
+
+  if (!yakin) {
+    return;
+  }
+
+
+  try {
+
+    showAlert(
+      "Sedang menyimpan data ke Spreadsheet..."
+    );
+
+
+    const url =
+      "https://script.google.com/macros/s/AKfycbzTLMB4ZQBHozoLVMIaKXhQALfbXbiEb2Fmg792LYj9BtILo669V1l8-4XfNtfIJJs/exec";
+
+
+    const response =
+      await fetch(
+        url,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body: JSON.stringify({
+            products:
+              products
+          })
+        }
+      );
+
+
+    const hasil =
+      await response.json();
+
+
+    if (!hasil.success) {
+
+      showAlert(
+        "Gagal menyimpan:\n" +
+        (hasil.message ||
+          "Kesalahan tidak diketahui")
+      );
+
+      return;
+    }
+
+
+    showAlert(
+      `Berhasil disimpan ke Spreadsheet.\n\n` +
+
+      `Produk diperbarui : ${hasil.update}\n` +
+
+      `Produk baru : ${hasil.tambah}\n` +
+
+      `Total data lokal : ${hasil.total}`
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showAlert(
+      "Gagal terhubung ke Google Spreadsheet."
+    );
+  }
+}
 
 /* =========================================================
    KONFIRMASI
