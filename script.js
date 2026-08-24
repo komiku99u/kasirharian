@@ -1592,7 +1592,139 @@ async function simpanKeSpreadsheet() {
 
     return;
   }
+async function samakanSpreadsheet() {
 
+  if (!products.length) {
+
+    showAlert(
+      "Data lokal kosong.\n\n" +
+      "Proses dibatalkan agar Spreadsheet " +
+      "tidak ikut menjadi kosong."
+    );
+
+    return;
+  }
+
+
+  // =========================================
+  // KONFIRMASI PERTAMA
+  // =========================================
+
+  const yakin =
+    confirm(
+      "PERINGATAN!\n\n" +
+
+      "Spreadsheet akan dibuat PERSIS " +
+      "sama dengan data lokal di PC.\n\n" +
+
+      "Produk yang hanya ada di Spreadsheet " +
+      "akan DIHAPUS.\n\n" +
+
+      "Jumlah produk lokal: " +
+      products.length +
+      "\n\n" +
+
+      "Lanjutkan?"
+    );
+
+
+  if (!yakin) {
+    return;
+  }
+
+
+  // =========================================
+  // KONFIRMASI KEDUA
+  // =========================================
+
+  const yakinLagi =
+    confirm(
+      "KONFIRMASI TERAKHIR\n\n" +
+
+      "Semua data produk di Spreadsheet " +
+      "akan diganti dengan data lokal.\n\n" +
+
+      "Produk yang tidak ada di PC akan dihapus.\n\n" +
+
+      "Yakin ingin melanjutkan?"
+    );
+
+
+  if (!yakinLagi) {
+    return;
+  }
+
+
+  try {
+
+    showAlert(
+      "Sedang menyamakan Spreadsheet..."
+    );
+
+
+    const url =
+      "https://script.google.com/macros/s/AKfycbzTLMB4ZQBHozoLVMIaKXhQALfbXbiEb2Fmg792LYj9BtILo669V1l8-4XfNtfIJJs/exec";
+
+
+    const response =
+      await fetch(
+        url,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body: JSON.stringify({
+
+            action:
+              "replace",
+
+            products:
+              products
+
+          })
+        }
+      );
+
+
+    const hasil =
+      await response.json();
+
+
+    if (!hasil.success) {
+
+      showAlert(
+        "Gagal menyamakan Spreadsheet.\n\n" +
+        (
+          hasil.message ||
+          "Kesalahan tidak diketahui"
+        )
+      );
+
+      return;
+    }
+
+
+    showAlert(
+      "Spreadsheet berhasil disamakan.\n\n" +
+
+      "Total produk: " +
+      hasil.total
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showAlert(
+      "Gagal terhubung ke Google Spreadsheet."
+    );
+  }
+}
 
   const yakin =
     confirm(
