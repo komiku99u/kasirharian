@@ -121,13 +121,24 @@
             Batal Edit
           </button>
           <div class="row">
-            <button onclick="exportCSV()">Export CSV</button>
 
-            <button onclick="document.getElementById('importFile').click()">
-              Import CSV
-            </button>
-            <button onclick="sinkronProduk()">🔄 Sinkron Produk</button>
-          </div>
+  <button>
+    Export CSV
+  </button>
+
+  <button>
+    Import CSV
+  </button>
+
+  <button onclick="sinkronProduk()">
+    🔄 Sinkron Produk
+  </button>
+
+  <button onclick="simpanKeSpreadsheet()">
+    ☁️ Simpan ke Spreadsheet
+  </button>
+
+</div>
 
           <input type="file" id="importFile" accept=".csv" hidden="" />
 
