@@ -12,18 +12,35 @@
       <div class="left-panel">
         <div class="card">
           <div class="katalog-header">
-            <h2>Katalog Produk</h2>
-            <div class="view-toggle">
-              <button id="btnGridView" class="view-btn active" onclick="ubahTampilanProduk('grid')">▦ Grid</button>
-              <button id="btnListView" class="view-btn" onclick="ubahTampilanProduk('list')">☰ List</button>
-              <button
+  <h2>Katalog Produk</h2>
+
+  <div class="view-toggle">
+
+    <button
+      id="btnGridView"
+      class="view-btn active"
+      onclick="ubahTampilanProduk('grid')"
+    >
+      ▦ Grid
+    </button>
+
+    <button
+      id="btnListView"
+      class="view-btn"
+      onclick="ubahTampilanProduk('list')"
+    >
+      ☰ List
+    </button>
+
+    <button
       class="logout-button"
       onclick="window.location.href='/api/logout'"
     >
       🚪 Logout
     </button>
-            </div>
-          </div>
+
+  </div>
+</div>
 
           <div class="paging">
             <button id="btnPrev" onclick="prevProduk()">◀ Prev</button>
