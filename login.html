@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Login - Kasir Harian</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 360px;
+      background: #1e1e1e;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .login-title {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .login-title h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .login-title p {
+      margin: 0;
+      color: #999;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      background: #111;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .form-group input:focus {
+      border-color: #2563eb;
+    }
+
+    #btnLogin {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #btnLogin:hover {
+      background: #1d4ed8;
+    }
+
+    #btnLogin:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #message {
+      min-height: 20px;
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      color: #ef4444;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-box">
+
+    <div class="login-title">
+      <h1>KASIR HARIAN</h1>
+      <p>Silakan login untuk melanjutkan</p>
+    </div>
+
+    <form id="loginForm">
+
+      <div class="form-group">
+        <label for="username">
+          Username
+        </label>
+
+        <input
+          type="text"
+          id="username"
+          autocomplete="username"
+          required
+          autofocus
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          type="password"
+          id="password"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <button
+        type="submit"
+        id="btnLogin"
+      >
+        LOGIN
+      </button>
+
+      <div id="message"></div>
+
+    </form>
+
+  </div>
+
+
+  <script>
+    const form =
+      document.getElementById("loginForm");
+
+    const username =
+      document.getElementById("username");
+
+    const password =
+      document.getElementById("password");
+
+    const btnLogin =
+      document.getElementById("btnLogin");
+
+    const message =
+      document.getElementById("message");
+
+
+    form.addEventListener(
+      "submit",
+      async function (event) {
+
+        event.preventDefault();
+
+        const user =
+          username.value.trim();
+
+        const pass =
+          password.value;
+
+        if (!user || !pass) {
+          message.textContent =
+            "Username dan password wajib diisi.";
+
+          return;
+        }
+
+        btnLogin.disabled = true;
+
+        btnLogin.textContent =
+          "MEMERIKSA...";
+
+        message.textContent = "";
+
+
+        try {
+
+          const response =
+            await fetch(
+              "/api/login",
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+
+                body: JSON.stringify({
+                  username: user,
+                  password: pass
+                })
+              }
+            );
+
+
+          const result =
+            await response.json();
+
+
+          if (
+            response.ok &&
+            result.success
+          ) {
+
+            /*
+             * Login berhasil.
+             *
+             * Cookie session dibuat oleh
+             * Cloudflare Function.
+             */
+
+            window.location.href =
+              "/index.html";
+
+            return;
+          }
+
+
+          message.textContent =
+            result.message ||
+            "Username atau password salah.";
+
+          password.value = "";
+
+          password.focus();
+
+
+        } catch (error) {
+
+          console.error(error);
+
+          message.textContent =
+            "Tidak dapat terhubung ke server.";
+
+        } finally {
+
+          btnLogin.disabled = false;
+
+          btnLogin.textContent =
+            "LOGIN";
+        }
+
+      }
+    );
+  </script>
+
+</body>
+</html>
