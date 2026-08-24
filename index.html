@@ -15,7 +15,13 @@
   <h2>Katalog Produk</h2>
 
   <div class="view-toggle">
+    <button>
+    Export CSV
+  </button>
 
+  <button>
+    Import CSV
+  </button>
     <button
       id="btnGridView"
       class="view-btn active"
@@ -103,9 +109,7 @@
             <button onclick="prosesBayar()" style="background: #f59e0b">
               💰 Bayar
             </button>
-            <button id="btnPrint" onclick="printStruk()" style="display:none;background:#16a34a">
-              🖨️ Print Struk
-            </button>
+            
           </div>
         </div>
 
@@ -122,13 +126,7 @@
           </button>
           <div class="row">
 
-  <button>
-    Export CSV
-  </button>
-
-  <button>
-    Import CSV
-  </button>
+  
 
   <button onclick="sinkronProduk()">
     🔄 Sinkron Produk
