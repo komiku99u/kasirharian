@@ -1,8 +1,15 @@
 export async function onRequest(context) {
   const url = new URL(context.request.url);
 
-  // Halaman dan API yang boleh diakses tanpa login
+  /*
+   * ==========================================
+   * HALAMAN / API YANG BOLEH DIAKSES TANPA LOGIN
+   * ==========================================
+   */
+
   const publicPaths = [
+    "/login",
+    "/login/",
     "/login.html",
     "/api/login",
     "/api/logout",
@@ -12,7 +19,13 @@ export async function onRequest(context) {
     return context.next();
   }
 
-  // File statis yang diperlukan halaman
+
+  /*
+   * ==========================================
+   * FILE STATIS YANG BOLEH DIAKSES
+   * ==========================================
+   */
+
   const publicExtensions = [
     ".css",
     ".js",
@@ -27,13 +40,21 @@ export async function onRequest(context) {
 
   if (
     publicExtensions.some((ext) =>
-      url.pathname.toLowerCase().endsWith(ext)
+      url.pathname
+        .toLowerCase()
+        .endsWith(ext)
     )
   ) {
     return context.next();
   }
 
-  // Ambil session cookie
+
+  /*
+   * ==========================================
+   * CEK COOKIE SESSION
+   * ==========================================
+   */
+
   const cookie =
     context.request.headers.get("Cookie") || "";
 
@@ -41,35 +62,62 @@ export async function onRequest(context) {
     /(?:^|;\s*)kasir_session=([^;]+)/
   );
 
-  const session = match ? match[1] : null;
+  const session =
+    match ? match[1] : null;
 
-  // Belum login
+
+  /*
+   * ==========================================
+   * BELUM LOGIN
+   * ==========================================
+   */
+
   if (!session) {
     return Response.redirect(
-      new URL("/login.html", url),
+      new URL("/login", url),
       302
     );
   }
 
-  // Validasi session
-  const valid = await verifySession(
-    session,
-    context.env.AUTH_PASSWORD
-  );
+
+  /*
+   * ==========================================
+   * VALIDASI SESSION
+   * ==========================================
+   */
+
+  const valid =
+    await verifySession(
+      session,
+      context.env.AUTH_PASSWORD
+    );
+
+
+  /*
+   * ==========================================
+   * SESSION TIDAK VALID / EXPIRED
+   * ==========================================
+   */
 
   if (!valid) {
-    return new Response(
-      null,
-      {
-        status: 302,
-        headers: {
-          Location: "/login.html",
-          "Set-Cookie":
-            "kasir_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax",
-        },
-      }
-    );
+    return new Response(null, {
+      status: 302,
+
+      headers: {
+        Location: "/login",
+
+        "Set-Cookie":
+          "kasir_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax",
+      },
+    });
   }
+
+
+  /*
+   * ==========================================
+   * SUDAH LOGIN
+   * ==========================================
+   */
 
   return context.next();
 }
@@ -84,21 +132,31 @@ async function verifySession(
   secret
 ) {
   try {
-    const parts = token.split(".");
+    const parts =
+      token.split(".");
 
     if (parts.length !== 2) {
       return false;
     }
 
-    const payload = parts[0];
-    const signature = parts[1];
+    const payload =
+      parts[0];
 
-    const data = JSON.parse(
-      decodeBase64Url(payload)
-    );
+    const signature =
+      parts[1];
 
-    // Session berlaku 7 hari
-    const sekarang = Date.now();
+    const data =
+      JSON.parse(
+        decodeBase64Url(payload)
+      );
+
+
+    /*
+     * Session berlaku 7 hari
+     */
+
+    const sekarang =
+      Date.now();
 
     if (
       !data.exp ||
@@ -107,16 +165,27 @@ async function verifySession(
       return false;
     }
 
+
+    /*
+     * Buat signature yang seharusnya
+     */
+
     const expected =
       await sign(
         payload,
         secret
       );
 
+
+    /*
+     * Bandingkan signature
+     */
+
     return timingSafeEqual(
       signature,
       expected
     );
+
   } catch {
     return false;
   }
@@ -124,7 +193,7 @@ async function verifySession(
 
 
 /* =========================================================
-   HMAC SIGNATURE
+   HMAC SHA-256
    ========================================================= */
 
 async function sign(
@@ -168,7 +237,9 @@ function base64Url(bytes) {
 
   bytes.forEach(
     (byte) => {
-      binary += String.fromCharCode(byte);
+      binary += String.fromCharCode(
+        byte
+      );
     }
   );
 
